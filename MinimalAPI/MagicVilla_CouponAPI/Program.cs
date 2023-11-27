@@ -18,8 +18,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapGet("/api/couopon", () =>
+app.MapGet("/api/couopon", (ILogger<Program> _logger) =>
 {
+    _logger.Log(LogLevel.Information, "Getting all coupons.");
+
     return Results.Ok(CouponStore.couponList);
 }).WithName("GetCoupons").Produces<IEnumerable<Coupon>>(200).Produces(400);
 
