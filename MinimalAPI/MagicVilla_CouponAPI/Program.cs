@@ -1,5 +1,6 @@
 using MagicVilla_CouponAPI.Data;
 using MagicVilla_CouponAPI.Models;
+using MagicVilla_CouponAPI.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,23 +31,38 @@ app.MapGet("/api/couopon{id:int}", (int id) =>
     return Results.Ok(CouponStore.couponList.FirstOrDefault(c => c.Id == id));
 }).WithName("GetCoupon").Produces<Coupon>(200).Produces(400);
 
-app.MapPost("/api/coupon", ([FromBody] Coupon coupon) =>
+app.MapPost("/api/coupon", ([FromBody] CouponCreateDto couponCreateDto) =>
 {
-    if (coupon.Id != 0 || string.IsNullOrEmpty(coupon.Name))
+    if (string.IsNullOrEmpty(couponCreateDto.Name))
     {
         return Results.BadRequest("Invalid Id or Coupon Name.");
     }
-    if (CouponStore.couponList.FirstOrDefault(c => c.Name.ToLower() == coupon.Name.ToLower()) != null)
+    if (CouponStore.couponList.FirstOrDefault(c => c.Name.ToLower() == couponCreateDto.Name.ToLower()) != null)
     {
         return Results.BadRequest("Coupon Name Already Exists.");
     }
 
+    Coupon coupon = new() 
+    { 
+        Name = couponCreateDto.Name,
+        Percent = couponCreateDto.Percent,
+        IsActive = couponCreateDto.IsActive
+    };
+
     coupon.Id = CouponStore.couponList.OrderByDescending(c => c.Id).FirstOrDefault().Id + 1;
     CouponStore.couponList.Add(coupon);
+    CouponDto couponDto = new()
+    {
+        Id = coupon.Id,
+        Name = coupon.Name,
+        IsActive = coupon.IsActive,
+        Percent = coupon.Percent,
+        Created = coupon.Created
+    };
 
     //return Results.Created($"/api/coupon{coupon.Id}", coupon);
-    return Results.CreatedAtRoute($"/api/coupon{coupon.Id}", new { id = coupon.Id }, coupon);
-}).WithName("CreateCoupon").Accepts<Coupon>("application/json").Produces<Coupon>(201).Produces(400);
+    return Results.CreatedAtRoute("GetCoupon", new { id = coupon.Id }, couponDto);
+}).WithName("CreateCoupon").Accepts<CouponCreateDto>("application/json").Produces<CouponDto>(201).Produces(400);
 
 app.MapPut("/api/coupon", () =>
 {
