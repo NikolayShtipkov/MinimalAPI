@@ -111,8 +111,7 @@ app.MapPut("/api/coupon", async ([FromBody] CouponUpdateDto couponUpdateDto, IMa
     coupon.IsActive = couponUpdateDto.IsActive;
     coupon.LastUpdated = DateTime.Now;
 
-    CouponDto couponDto = _mapper.Map<CouponDto>(coupon);
-    response.Result = couponDto;
+    response.Result = _mapper.Map<CouponDto>(coupon);
     response.isSuccessful = true;
     response.StatusCode = HttpStatusCode.OK;
 
@@ -133,9 +132,9 @@ app.MapDelete("/api/coupon{id:int}", (int id) =>
     CouponStore.couponList.Remove(coupon);
 
     response.isSuccessful = true;
-    response.StatusCode = HttpStatusCode.OK;
+    response.StatusCode = HttpStatusCode.NoContent;
     return Results.Ok(response);
-}).WithName("DeleteCoupon").Produces<ApiResponse>(200).Produces(400);
+}).WithName("DeleteCoupon").Produces<ApiResponse>(204).Produces(400);
 
 app.UseHttpsRedirection();
 
