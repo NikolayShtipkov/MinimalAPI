@@ -8,8 +8,9 @@ namespace MagicVilla_CouponAPI
     {
         public MappingConfig() 
         {
-            CreateMap<Coupon, CouponCreateDto>().ReverseMap();
             CreateMap<Coupon, CouponDto>().ReverseMap();
+            CreateMap<Coupon, CouponCreateDto>().ReverseMap();
+            CreateMap<Coupon, CouponCreateDto>().ReverseMap();
         }
     }
 }

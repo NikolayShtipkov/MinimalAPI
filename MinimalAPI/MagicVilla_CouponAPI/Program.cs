@@ -66,8 +66,9 @@ app.MapPost("/api/coupon", async ([FromBody] CouponCreateDto couponCreateDto, IM
     }
 
     Coupon coupon = _mapper.Map<Coupon>(couponCreateDto);
-
     coupon.Id = CouponStore.couponList.OrderByDescending(c => c.Id).FirstOrDefault().Id + 1;
+    coupon.Created = DateTime.Now;
+    coupon.LastUpdated = DateTime.Now;
     CouponStore.couponList.Add(coupon);
     CouponDto couponDto = _mapper.Map<CouponDto>(coupon);
 
@@ -81,9 +82,41 @@ app.MapPost("/api/coupon", async ([FromBody] CouponCreateDto couponCreateDto, IM
     //return Results.CreatedAtRoute("GetCoupon", new { id = coupon.Id }, couponDto);
 }).WithName("CreateCoupon").Accepts<CouponCreateDto>("application/json").Produces<ApiResponse>(201).Produces(400);
 
-app.MapPut("/api/coupon", () =>
+app.MapPut("/api/coupon", async ([FromBody] CouponUpdateDto couponUpdateDto, IMapper _mapper,
+    IValidator<CouponUpdateDto> _validation) =>
 {
+    ApiResponse response = new() { isSuccessful = false, StatusCode = HttpStatusCode.BadRequest };
 
+    var validationResult = await _validation.ValidateAsync(couponUpdateDto);
+    if (!validationResult.IsValid)
+    {
+        response.ErrorMessages.Add(validationResult.Errors.FirstOrDefault().ToString());
+        return Results.BadRequest(response);
+    }
+    if (CouponStore.couponList.FirstOrDefault(c => c.Name.ToLower() == couponUpdateDto.Name.ToLower()) != null)
+    {
+        response.ErrorMessages.Add("Coupon name already exists.");
+        return Results.BadRequest(response);
+    }
+
+    Coupon coupon = CouponStore.couponList.FirstOrDefault(c => c.Id == couponUpdateDto.Id);
+    if (coupon == null)
+    {
+        response.ErrorMessages.Add("Coupon doesn't exist");
+        return Results.BadRequest(response);
+    }
+
+    coupon.Name = couponUpdateDto.Name;
+    coupon.Percent = couponUpdateDto.Percent;
+    coupon.IsActive = couponUpdateDto.IsActive;
+    coupon.LastUpdated = DateTime.Now;
+
+    CouponDto couponDto = _mapper.Map<CouponDto>(coupon);
+    response.Result = couponDto;
+    response.isSuccessful = true;
+    response.StatusCode = HttpStatusCode.OK;
+
+    return Results.Ok(response);
 });
 
 app.MapDelete("/api/coupon{id:int}", (int id) =>
