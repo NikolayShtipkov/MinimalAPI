@@ -117,12 +117,25 @@ app.MapPut("/api/coupon", async ([FromBody] CouponUpdateDto couponUpdateDto, IMa
     response.StatusCode = HttpStatusCode.OK;
 
     return Results.Ok(response);
-});
+}).WithName("UpdateCoupon").Accepts<CouponUpdateDto>("application/json").Produces<ApiResponse>(200).Produces(400);
 
 app.MapDelete("/api/coupon{id:int}", (int id) =>
 {
+    ApiResponse response = new() { isSuccessful = false, StatusCode = HttpStatusCode.BadRequest };
 
-});
+    Coupon coupon = CouponStore.couponList.FirstOrDefault(c => c.Id == id);
+    if (coupon == null)
+    {
+        response.ErrorMessages.Add("Coupon doesn't exist");
+        return Results.BadRequest(response);
+    }
+
+    CouponStore.couponList.Remove(coupon);
+
+    response.isSuccessful = true;
+    response.StatusCode = HttpStatusCode.OK;
+    return Results.Ok(response);
+}).WithName("DeleteCoupon").Produces<ApiResponse>(200).Produces(400);
 
 app.UseHttpsRedirection();
 
