@@ -33,7 +33,5 @@ if (app.Environment.IsDevelopment())
 }
 
 app.ConfigureCouponEnpoints();
-
 app.UseHttpsRedirection();
-
 app.Run();
