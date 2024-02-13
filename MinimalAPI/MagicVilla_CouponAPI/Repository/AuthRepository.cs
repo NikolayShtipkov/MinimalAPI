@@ -28,7 +28,6 @@ namespace MagicVilla_CouponAPI.Repository
         public bool IsUniqueUser(string username)
         {
             var user = _db.LocalUsers.FirstOrDefault(x => x.Username == username);
-
             if (user == null)
             {
                 return true;
@@ -39,9 +38,9 @@ namespace MagicVilla_CouponAPI.Repository
 
         public async Task<LoginResponseDto> Authenticate(LoginRequestDto loginRequestDto)
         {
-            var user = _db.LocalUsers.SingleOrDefault(x => x.Username == loginRequestDto.Username
-                                                        && x.Password == loginRequestDto.Password);
-
+            var user = _db.LocalUsers
+                .SingleOrDefault(x => x.Username == loginRequestDto.Username
+                && x.Password == loginRequestDto.Password);
             if (user == null)
             {
                 return null;
@@ -62,7 +61,6 @@ namespace MagicVilla_CouponAPI.Repository
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-
             LoginResponseDto loginResponseDto = new()
             {
                 User = _mapper.Map<UserDto>(user),
