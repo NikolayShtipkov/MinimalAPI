@@ -14,10 +14,21 @@ namespace MagicVilla_CouponAPI.Endpoints
         public static void ConfigureCouponEnpoints(this WebApplication app)
         {
             app.MapGet("/api/couopon", GetAllCoupons)
-                .WithName("GetCoupons").Produces<ApiResponse>(200).Produces(400).RequireAuthorization("AdminOnly");
+                .WithName("GetCoupons").Produces<ApiResponse>(200).Produces(400)
+                .RequireAuthorization("AdminOnly");
 
             app.MapGet("/api/couopon{id:int}", GetCoupon)
-                .WithName("GetCoupon").Produces<ApiResponse>(200).Produces(400);
+                .WithName("GetCoupon").Produces<ApiResponse>(200).Produces(400)
+                .AddEndpointFilter(async (context, next) =>
+                {
+                    var id = context.GetArgument<int>(2);
+                    if (id == 0)
+                    {
+                        return Results.BadRequest("Cannot have 0 in id.");
+                    }
+
+                    return await next(context);
+                });
 
             app.MapPost("/api/coupon", CreateCoupon)
                 .WithName("CreateCoupon").Accepts<CouponCreateDto>("application/json").Produces<ApiResponse>(201).Produces(400);
