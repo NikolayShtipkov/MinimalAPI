@@ -27,7 +27,22 @@ namespace MagicVilla_CouponAPI.Endpoints
                         return Results.BadRequest("Cannot have 0 in id.");
                     }
 
-                    return await next(context);
+                    Console.WriteLine("Before filter");
+
+                    var result = await next(context);
+
+                    Console.WriteLine("After filter");
+
+                    return result;
+                }).AddEndpointFilter(async (context, next) =>
+                {
+                    Console.WriteLine("Before 2nd filter");
+
+                    var result = await next(context);
+
+                    Console.WriteLine("After 2nd filter");
+
+                    return result;
                 });
 
             app.MapPost("/api/coupon", CreateCoupon)
@@ -42,6 +57,8 @@ namespace MagicVilla_CouponAPI.Endpoints
 
         private async static Task<IResult> GetCoupon(ICouponRepository _couponRepo, int id)
         {
+            Console.WriteLine("Endpoint Executed");
+
             ApiResponse response = new();
             response.Result = await _couponRepo.GetAsync(id);
             response.isSuccessful = true;
