@@ -13,7 +13,7 @@ namespace MagicVilla_CouponAPI.Endpoints
         public static void ConfigureCouponEnpoints(this WebApplication app)
         {
             app.MapGet("/api/couopon", GetAllCoupons)
-                .WithName("GetCoupons").Produces<ApiResponse>(200).Produces(400);
+                .WithName("GetCoupons").Produces<ApiResponse>(200).Produces(400).RequireAuthorization();
 
             app.MapGet("/api/couopon{id:int}", GetCoupon)
                 .WithName("GetCoupon").Produces<ApiResponse>(200).Produces(400);
